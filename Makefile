@@ -8,7 +8,7 @@ CXX := $(CROSS_COMPILE)g++
 OS = $(shell uname -s)
 
 KOALA = ../KoalaJS/build
-CFLAGS = -Wall -g -I./ -I$(KOALA)/include -fPIC -std=c++11  -stdlib=libc++ 
+CFLAGS = -Wall -g -I./ -I$(KOALA)/include -fPIC -std=c++11 
 LDFLAGS = -L$(KOALA) -lKoalaJS \
 		-lpthread -luWS -lssl -lcrypto -lz -luv
 NATIVE_DIR = native

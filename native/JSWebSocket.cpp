@@ -1,5 +1,6 @@
 #include "JSWebSocket.h"
 #include <cstdlib>
+#include <pthread.h>
 #include <uWS/uWS.h>
 
 using namespace std;
@@ -25,51 +26,58 @@ static void _destroyWSHub(void* p) {
 	}
 }
 
+#define PRE_HANDLE	KoalaJS* js = (KoalaJS*)ws->getUserData(); \
+		Interrupter* inter = js->getInterrupter();
+
 void JSWebSocketHub::constructor(KoalaJS* js, BCVar *c, void *) {
 	BCVar* thisV = c->getParameter(THIS);
-	if(thisV == NULL)
-		return;
 	uWS::Hub* wsHub = new uWS::Hub();
 
 	BCVar* v = new BCVar();
 	v->setPoint(wsHub, NO_BYTES, _destroyWSHub, true);
 	thisV->addChild("wsHub", v);
+	thisV->addChild("onConnection");
+	thisV->addChild("onDisconnection");
+	thisV->addChild("onError");
+	thisV->addChild("onMessage");
 
-	wsHub->onError([](void* p) {
+	wsHub->onError([thisV](void* p) {
 		KoalaJS* js = (KoalaJS*)p;
 		Interrupter* inter = js->getInterrupter();
-		inter->interrupt("_onWSHubError", 0);
+		inter->interrupt("_onWSHubError", 1, thisV);
+		TRACE("WSHub error!\n");
 	});
 
-	wsHub->onConnection([](uWS::WebSocket<uWS::CLIENT> *ws, uWS::HttpRequest req) {
-		KoalaJS* js = (KoalaJS*)ws->getUserData();
-		Interrupter* inter = js->getInterrupter();
+	wsHub->onConnection([thisV](uWS::WebSocket<uWS::CLIENT> *ws, uWS::HttpRequest req) {
+		PRE_HANDLE
 		BCVar* w = js->newObject("RWebSocket");
 		w->addChild("wsocket", new BCVar(ws, NO_BYTES, NULL, false));
-		inter->interrupt("_onWSHubConnection", 1, w);
+		inter->interrupt("_onWSHubConnection", 2, thisV, w);
+		TRACE("WSHub connection.\n");
 	});
 
-	wsHub->onDisconnection([](uWS::WebSocket<uWS::CLIENT> *ws, int code, char *message, size_t length) {
-		KoalaJS* js = (KoalaJS*)ws->getUserData();
-		Interrupter* inter = js->getInterrupter();
+	wsHub->onDisconnection([thisV](uWS::WebSocket<uWS::CLIENT> *ws, int code, char *message, size_t length) {
+		PRE_HANDLE
 		BCVar* w = js->newObject("RWebSocket");
 		w->addChild("wsocket", new BCVar(ws, NO_BYTES, NULL, false));
 
 		BCVar* cd = new BCVar(code);
-		BCVar* bytes = new BCVar(message, (int)length, NULL, false);
-		inter->interrupt("_onWSHubDisconnection", 3, w, cd, bytes);
+		BCVar* bytes = js->newObject("Bytes");
+		bytes->setPoint(message, (int)length, NULL, false);
+		inter->interrupt("_onWSHubDisconnection", 4, thisV, w, cd, bytes);
+		TRACE("WSHub disconnection.\n");
 	});
 
-	wsHub->onMessage([](uWS::WebSocket<uWS::SERVER> *ws, char *message, size_t length, uWS::OpCode opCode) {
-		KoalaJS* js = (KoalaJS*)ws->getUserData();
-		Interrupter* inter = js->getInterrupter();
+	wsHub->onMessage([thisV](uWS::WebSocket<uWS::CLIENT> *ws, char *message, size_t length, uWS::OpCode opCode) {
+		PRE_HANDLE
 		BCVar* w = js->newObject("RWebSocket");
 		w->addChild("wsocket", new BCVar(ws, NO_BYTES, NULL, false));
 
 		BCVar* cd = new BCVar((int)opCode);
-		BCVar* bytes = new BCVar(message, (int)length, NULL, false);
-		inter->interrupt("_onWSHubMessage", 3, w, cd, bytes);
-	
+		BCVar* bytes = js->newObject("Bytes");
+		bytes->setPoint(message, (int)length, NULL, false);
+		inter->interrupt("_onWSHubMessage", 4, thisV, w, cd, bytes);
+		TRACE("WSHub message.\n");
 	});
 
 	c->setReturnVar(thisV);
@@ -82,9 +90,17 @@ void JSWebSocketHub::connect(KoalaJS* js, BCVar *c, void *) {
 	wsHub->connect(uri.c_str(), js);
 }
 
+void* _WSHubThread(void* p) {
+	uWS::Hub* wsHub = (uWS::Hub*)p;
+	pthread_detach(pthread_self());
+	wsHub->run();
+	return NULL;
+}
+
 void JSWebSocketHub::run(KoalaJS* js, BCVar *c, void *) {
 	GET_WSHUB
-	wsHub->run();
+	pthread_t t;
+	pthread_create(&t, NULL, _WSHubThread, wsHub);
 }
 
 typedef uWS::WebSocket<uWS::CLIENT> WSClient;
@@ -106,5 +122,33 @@ WSClient * _getWS(BCVar* var) {
 void JSWebSocket::close(KoalaJS* js, BCVar *c, void *) {
 	GET_WS
 	ws->close();
+}
+
+void JSWebSocket::send(KoalaJS* js, BCVar *c, void *) {
+	GET_WS
+	BCVar* v = c->getParameter("buf");
+	BCVar* sv = c->getParameter("size");
+	
+	int size = 0;	
+	if(sv != NULL)
+		size = sv->getInt();
+
+	const char* p = NULL;
+	std::string s;
+	if(v->isBytes()) {
+		p = (const char*)v->getPoint();
+		if(size == 0 || size > v->getInt())
+			size = v->getInt();
+	}
+	else {
+		s = v->getString();
+		p = (const char*)s.c_str();
+		if(size == 0 || size > (int)s.length())
+			size = (int)s.length();
+	}
+
+	if(p != NULL) {
+		ws->send(p, size, uWS::OpCode::TEXT);
+	}
 }
 
