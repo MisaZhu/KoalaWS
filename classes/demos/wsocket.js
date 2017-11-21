@@ -2,7 +2,7 @@ include "../RWebSocket.js";
 
 var _end = false;
 
-var ws = new WebSocket();
+var ws = new WebSocketClient();
 ws.onConnection = function() {
 	send("hello");
 };

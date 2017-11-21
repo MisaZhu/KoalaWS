@@ -31,7 +31,7 @@ function _onWSHubPong(wsHub, ws, bytes) {
 		wsHub.onHubPong(ws, bytes);
 }
 
-class WebSocket {
+class WebSocketClient {
 	constructor() {
 		this.wsHub = new RWebSocketHub();
 		wsHub._this = this;
