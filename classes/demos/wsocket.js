@@ -2,27 +2,32 @@ include "../RWebSocket.js";
 
 var _end = false;
 
-var wshub = new RWebSocketHub();
-
-wshub.onConnection = function(ws) {
-	ws.send("hello");
+var ws = new WebSocket();
+ws.onConnection = function() {
+	send("hello");
 };
 
-wshub.onDisconnection = function(ws, code, bytes) {
+ws.onDisconnection = function(bytes) {
 	_end = true;
 };
 
-wshub.onMessage = function(ws, code, bytes) {
+ws.onMessage = function(bytes) {
 	println(bytes.toString());
-	ws.close();
 };
 
-wshub.onError = function() {
-	ws.close();
+ws.onError = function() {
+	close();
 };
 
-wshub.connect("ws://demos.kaazing.com/echo");
-wshub.run();
+ws.onPing = function(bytes) {
+	ws.ping("got");
+};
+
+ws.onPong = function(bytes) {
+	close();
+};
+
+ws.connect("wss://demos.kaazing.com/echo");
 
 while(!_end) {
 	RThread.usleep(10000);
