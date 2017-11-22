@@ -8,13 +8,12 @@ CXX := $(CROSS_COMPILE)g++
 OS = $(shell uname -s)
 
 KOALA = ../KoalaJS/build
-UWS = ../uWebSockets/build
-CFLAGS = -Wall -g -I./ -I$(UWS)/include -I$(KOALA)/include -fPIC -std=c++11 
+CFLAGS = -Wall -g -I./ -I$(KOALA)/include -fPIC -std=c++11 
 LDFLAGS = -L$(KOALA) -lKoalaJS \
-		-L$(UWS) -luWS \
+		-luWS \
 		-lpthread -lssl -lcrypto -lz 
 
-ifeq($(OS),Darwin)
+ifeq ($(OS),Darwin)
 LDFLAGS := -luv
 endif
 
