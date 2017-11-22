@@ -8,9 +8,16 @@ CXX := $(CROSS_COMPILE)g++
 OS = $(shell uname -s)
 
 KOALA = ../KoalaJS/build
-CFLAGS = -Wall -g -I./ -I$(KOALA)/include -fPIC -std=c++11 
+UWS = ../uWebSockets/build
+CFLAGS = -Wall -g -I./ -I$(UWS)/include -I$(KOALA)/include -fPIC -std=c++11 
 LDFLAGS = -L$(KOALA) -lKoalaJS \
-		-lpthread -luWS -lssl -lcrypto -lz -luv
+		-L$(UWS) -luWS \
+		-lpthread -lssl -lcrypto -lz 
+
+ifeq($(OS),Darwin)
+LDFLAGS := -luv
+endif
+
 NATIVE_DIR = native
 
 TARGET = build
