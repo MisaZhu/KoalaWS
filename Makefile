@@ -9,12 +9,15 @@ OS = $(shell uname -s)
 
 KOALA = ../KoalaJS/build
 CFLAGS = -Wall -g -I./ -I$(KOALA)/include -fPIC -std=c++11 
-LDFLAGS = -L$(KOALA) -lKoalaJS \
-		-luWS \
-		-lpthread -lssl -lcrypto -lz 
 
 ifeq ($(OS),Darwin)
-LDFLAGS := -luv
+LDFLAGS = -L$(KOALA) -lKoalaJS \
+		-luWS \
+		-lpthread -lssl -lcrypto -lz -luv
+else
+LDFLAGS = -L$(KOALA) -lKoalaJS \
+		-luWS \
+		-lpthread -lssl -lcrypto -lz
 endif
 
 NATIVE_DIR = native
