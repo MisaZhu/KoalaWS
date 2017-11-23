@@ -1,4 +1,4 @@
-RVM.loadExt("KoalaWS");
+RVM.loadModule("KoalaWS");
 
 function _onWSHubConnection(wsHub, ws) {
 	if(wsHub.onHubConnection != undefined) {
