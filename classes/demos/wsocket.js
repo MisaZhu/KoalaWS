@@ -12,7 +12,7 @@ ws.onDisconnection = function(bytes) {
 };
 
 ws.onMessage = function(bytes) {
-	println(bytes.toString());
+	console.log(bytes.toString());
 };
 
 ws.onError = function() {
