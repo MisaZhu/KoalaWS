@@ -1,37 +1,37 @@
 RVM.loadModule("KoalaWS");
 
-function _onWSHubConnection(wsHub, ws) {
+Interrupter._onWSHubConnection = function (wsHub, ws) {
 	if(wsHub.onHubConnection != undefined) {
 		wsHub.onHubConnection(ws);
 	}
-}
+};
 
-function _onWSHubError(wsHub) {
+Interrupter._onWSHubError = function (wsHub) {
 	if(wsHub.onHubError != undefined)
 		wsHub.onHubError();
-}
+};
 
-function _onWSHubDisconnection(wsHub, ws, code, bytes) {
+Interrupter._onWSHubDisconnection = function(wsHub, ws, code, bytes) {
 	if(wsHub.onHubDisconnection != undefined)
 		wsHub.onHubDisconnection(ws, code, bytes);
-}
+};
 
-function _onWSHubMessage(wsHub, ws, code, bytes) {
+Interrupter._onWSHubMessage = function(wsHub, ws, code, bytes) {
 	if(wsHub.onHubMessage != undefined)
 		wsHub.onHubMessage(ws, code, bytes);
-}
+};
 
-function _onWSHubPing(wsHub, ws, bytes) {
+Interrupter._onWSHubPing = function(wsHub, ws, bytes) {
 	if(wsHub.onHubPing != undefined)
 		wsHub.onHubPing(ws, bytes);
-}
+};
 
-function _onWSHubPong(wsHub, ws, bytes) {
+Interrupter._onWSHubPong = function(wsHub, ws, bytes) {
 	if(wsHub.onHubPong != undefined)
 		wsHub.onHubPong(ws, bytes);
-}
+};
 
-class WebSocketClient {
+exports = class {
 	constructor() {
 		this.wsHub = new RWebSocketHub();
 		wsHub._this = this;
@@ -105,5 +105,5 @@ class WebSocketClient {
 		if(wsClient != undefined)
 			wsClient.ping(buf);
 	}
-}
+};
 
