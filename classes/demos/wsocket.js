@@ -1,4 +1,4 @@
-var WebSocketClient = require("../RWebSocket.js");
+import "../RWebSocket.js";
 
 var _end = false;
 

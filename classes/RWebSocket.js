@@ -31,7 +31,7 @@ Interrupter._onWSHubPong = function(wsHub, ws, bytes) {
 		wsHub.onHubPong(ws, bytes);
 };
 
-exports = class {
+class WebSocketClient {
 	constructor() {
 		this.wsHub = new RWebSocketHub();
 		wsHub._this = this;
@@ -105,5 +105,5 @@ exports = class {
 		if(wsClient != undefined)
 			wsClient.ping(buf);
 	}
-};
+}
 
