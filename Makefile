@@ -8,7 +8,7 @@ CXX := $(CROSS_COMPILE)g++
 OS = $(shell uname -s)
 
 KOALA = ../KoalaJS/build
-CFLAGS = -Wall -g -I./ -I$(KOALA)/include -fPIC -std=c++11 
+CFLAGS = -Wall -g -I./ -I$(KOALA)/include -fPIC -std=c++11
 
 ifeq ($(OS),Darwin)
 LDFLAGS = -L$(KOALA) -lKoalaJS \

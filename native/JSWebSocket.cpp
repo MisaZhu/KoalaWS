@@ -40,7 +40,7 @@ void JSWebSocketHub::constructor(KoalaJS* js, BCVar *c, void *) {
 	wsHub->onError([thisV](void* p) {
 		KoalaJS* js = (KoalaJS*)p;
 		Interrupter* inter = js->getInterrupter();
-		inter->interrupt(NULL, "_onWSHubError", 1, thisV);
+		inter->interrupt(thisV, "onError", 0);
 		//TRACE("WSHub error!\n");
 	});
 
@@ -48,7 +48,7 @@ void JSWebSocketHub::constructor(KoalaJS* js, BCVar *c, void *) {
 		PRE_HANDLE
 		BCVar* w = js->newObject("RWebSocketClient");
 		w->addChild("wsocket", new BCVar(ws, NO_BYTES, NULL, false));
-		inter->interrupt(NULL, "_onWSHubConnection", 2, thisV, w);
+		inter->interrupt(thisV, "onConnection", 1, w);
 		//TRACE("WSHub connection.\n");
 	});
 
@@ -60,7 +60,7 @@ void JSWebSocketHub::constructor(KoalaJS* js, BCVar *c, void *) {
 		BCVar* cd = new BCVar(code);
 		BCVar* bytes = js->newObject("Bytes");
 		bytes->setPoint(message, (int)length, NULL, false);
-		inter->interrupt(NULL, "_onWSHubDisconnection", 4, thisV, w, cd, bytes);
+		inter->interrupt(thisV, "onDisconnection", 3, w, cd, bytes);
 		//TRACE("WSHub disconnection.\n");
 	});
 
@@ -72,7 +72,7 @@ void JSWebSocketHub::constructor(KoalaJS* js, BCVar *c, void *) {
 		BCVar* cd = new BCVar((int)opCode);
 		BCVar* bytes = js->newObject("Bytes");
 		bytes->setPoint(message, (int)length, NULL, false);
-		inter->interrupt(NULL, "_onWSHubMessage", 4, thisV, w, cd, bytes);
+		inter->interrupt(thisV, "onMessage", 3, w, cd, bytes);
 		//TRACE("WSHub message.\n");
 	});
 
@@ -83,7 +83,7 @@ void JSWebSocketHub::constructor(KoalaJS* js, BCVar *c, void *) {
 
 		BCVar* bytes = js->newObject("Bytes");
 		bytes->setPoint(message, (int)length, NULL, false);
-		inter->interrupt(NULL, "_onWSHubPing", 3, thisV, w, bytes);
+		inter->interrupt(thisV, "onPing", 2, w, bytes);
 		//TRACE("WSHub ping.\n");
 	});
 
@@ -94,7 +94,7 @@ void JSWebSocketHub::constructor(KoalaJS* js, BCVar *c, void *) {
 
 		BCVar* bytes = js->newObject("Bytes");
 		bytes->setPoint(message, (int)length, NULL, false);
-		inter->interrupt(NULL, "_onWSHubPong", 3, thisV, w, bytes);
+		inter->interrupt(thisV, "onPong", 2, w, bytes);
 		//TRACE("WSHub pong.\n");
 	});
 

@@ -1,36 +1,5 @@
 RVM.loadModule("KoalaWS");
 
-Interrupter._onWSHubConnection = function (wsHub, ws) {
-	if(wsHub.onHubConnection != undefined) {
-		wsHub.onHubConnection(ws);
-	}
-};
-
-Interrupter._onWSHubError = function (wsHub) {
-	if(wsHub.onHubError != undefined)
-		wsHub.onHubError();
-};
-
-Interrupter._onWSHubDisconnection = function(wsHub, ws, code, bytes) {
-	if(wsHub.onHubDisconnection != undefined)
-		wsHub.onHubDisconnection(ws, code, bytes);
-};
-
-Interrupter._onWSHubMessage = function(wsHub, ws, code, bytes) {
-	if(wsHub.onHubMessage != undefined)
-		wsHub.onHubMessage(ws, code, bytes);
-};
-
-Interrupter._onWSHubPing = function(wsHub, ws, bytes) {
-	if(wsHub.onHubPing != undefined)
-		wsHub.onHubPing(ws, bytes);
-};
-
-Interrupter._onWSHubPong = function(wsHub, ws, bytes) {
-	if(wsHub.onHubPong != undefined)
-		wsHub.onHubPong(ws, bytes);
-};
-
 class WebSocketClient {
 	constructor() {
 		this.wsHub = new RWebSocketHub();
@@ -44,36 +13,36 @@ class WebSocketClient {
 		this.onPing = undefined;
 		this.onPong = undefined;
 
-		wsHub.onHubConnection = function(ws) {
+		wsHub.onConnection = function(ws) {
 			_this.wsClient = ws;
 			if(_this.onConnection != undefined)
 				_this.onConnection();
 		};
 		
-		wsHub.onHubDisconnection = function(ws, code, bytes) {
+		wsHub.onDisconnection = function(ws, code, bytes) {
 			_this.wsClient = ws;
 			if(_this.onDisconnection != undefined)
 				_this.onDisconnection(bytes);
 		};	
 
-		wsHub.onHubError = function() {
+		wsHub.onError = function() {
 			if(_this.onError != undefined)
 				_this.onError();
 		};
 
-		wsHub.onHubMessage = function(ws, code, bytes) {
+		wsHub.onMessage = function(ws, code, bytes) {
 			_this.wsClient = ws;
 			if(_this.onMessage != undefined)
 				_this.onMessage(bytes);
 		};
 
-		wsHub.onHubPing = function(ws, bytes) {
+		wsHub.onPing = function(ws, bytes) {
 			_this.wsClient = ws;
 			if(_this.onPing != undefined)
 				_this.onPing(bytes);
 		};
 
-		wsHub.onHubPong = function(ws, bytes) {
+		wsHub.onPong = function(ws, bytes) {
 			_this.wsClient = ws;
 			if(_this.onPong != undefined)
 				_this.onPong(bytes);
