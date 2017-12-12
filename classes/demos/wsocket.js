@@ -1,14 +1,12 @@
 import "../RWebSocket.js";
 
-var _end = false;
-
 var ws = new WebSocketClient();
 ws.onConnection = function() {
 	send("hello");
 };
 
 ws.onDisconnection = function(bytes) {
-	_end = true;
+	RVM.terminate();
 };
 
 ws.onMessage = function(bytes) {
@@ -20,7 +18,7 @@ ws.onError = function() {
 };
 
 ws.onPing = function(bytes) {
-	ws.ping("got");
+	ping("got");
 };
 
 ws.onPong = function(bytes) {
@@ -29,6 +27,6 @@ ws.onPong = function(bytes) {
 
 ws.connect("wss://demos.kaazing.com/echo");
 
-while(!_end) {
+while(!RVM.terminated()) {
 	RThread.usleep(10000);
 }
